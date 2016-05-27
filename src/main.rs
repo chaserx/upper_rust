@@ -7,7 +7,7 @@ use std::io::Read;
 use hyper::{Client};
 use hyper::header::{Authorization};
 
-// probably should make this return a boolean and take URL and AUTH arguments
+// probably should make this return a boolean
 fn check_url(uri: String, auth: String) {
     let client = Client::new();
     println!("Getting... {}", uri);
