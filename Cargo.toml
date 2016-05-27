@@ -1,0 +1,10 @@
+[package]
+name = "up"
+version = "0.1.0"
+authors = ["Chase Southard <chase.southard@gmail.com>"]
+
+[dependencies]
+hyper = "0.9.6"
+dotenv = "0.8.0"
+syntex = "0.32.0"
+dotenv_codegen = "0.8.1"
