@@ -30,6 +30,6 @@
 
 Pull requests welcome. Please follow the contribution guide.
 
-## licence
+## license
 
 [MIT](LICENSE.md)
