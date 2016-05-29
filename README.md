@@ -25,3 +25,11 @@
 ## release
 
 `cargo build --release` note: provides some optimizations; not meant for debugging
+
+## contributions
+
+Pull requests welcome. Please follow the contribution guide.
+
+## licence
+
+[MIT](LICENSE.md)
