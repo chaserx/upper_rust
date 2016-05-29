@@ -1,5 +1,5 @@
 [package]
-name = "up"
+name = "upper_rust"
 version = "0.1.0"
 authors = ["Chase Southard <chase.southard@gmail.com>"]
 
