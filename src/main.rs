@@ -12,11 +12,17 @@ use std::thread::sleep;
 fn check_url(uri: &str, auth_token: &str) -> bool {
     let client = Client::new();
     println!("Getting... {}", uri);
-    let mut res = client.get(uri)
-                        .header(Authorization(auth_token.to_owned()))
-                        .send()
-                        .unwrap();
-    // probably need to switch this to a match statement to capture when DNS fails
+    // maybe conditional assignment. with or without auth_token
+    let mut res = if auth_token.len() == 0 {
+                        client.get(uri).send().unwrap()
+                  } else {
+                        client.get(uri)
+                              .header(Authorization(auth_token.to_owned()))
+                              .send()
+                              .unwrap()
+                  };
+
+    // probably need to switch this to a match statement to capture DNS failure
     // or myabe use the try! macro
     if hyper::Ok == res.status {
             let mut s = String::new();
@@ -31,25 +37,26 @@ fn check_url(uri: &str, auth_token: &str) -> bool {
 }
 
 // another function that will alert someone, maybe slack webhook.
-// fn notify() {
-
-// }
+fn notify() {
+    println!("bummer");
+}
 
 fn main() {
     dotenv().ok();
 
-    let uri = String::from(env::var("URL").unwrap());
-    let auth_token = String::from(env::var("AUTH").unwrap());
+    let uri = env::var("URL").expect("URL must be set");
+    let auth_token = env::var("AUTH")
+                          .expect("URL must be set. At least an empty string.");
+
     let mut attempts = 0;
-    let max_attempts = 5;
+    const MAX_ATTEMPTS: i32 = 5;
 
     while !check_url(&uri, &auth_token) {
         println!("site not responding, rechecking...");
         sleep(Duration::from_secs(60));
         attempts += 1;
-        if attempts >= max_attempts {
-            // notify
-            println!("bummer");
+        if attempts >= MAX_ATTEMPTS {
+            notify();
             break;
         }
     }
