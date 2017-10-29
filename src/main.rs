@@ -1,58 +1,49 @@
-extern crate hyper;
+extern crate reqwest;
 extern crate dotenv;
 
 use dotenv::dotenv;
-use std::env;
 use std::io::Read;
-use hyper::{Client};
-use hyper::header::{Authorization};
+use std::env;
 use std::time::{Duration};
 use std::thread::sleep;
+use reqwest::{Url};
 
-fn check_url(uri: &str, auth_token: &str) -> bool {
-    let client = Client::new();
-    println!("Getting... {}", uri);
-    // maybe conditional assignment. with or without auth_token
-    let mut res = if auth_token.len() == 0 {
-                        client.get(uri).send().unwrap()
-                  } else {
-                        client.get(uri)
-                              .header(Authorization(auth_token.to_owned()))
-                              .send()
-                              .unwrap()
-                  };
-
-    // probably need to switch this to a match statement to capture DNS failure
-    // or myabe use the try! macro
-    if hyper::Ok == res.status {
-            let mut s = String::new();
-            res.read_to_string(&mut s).unwrap();
-        if String::from(env::var("VERBOSE_MODE").unwrap()) == "true" {
-            println!("{:?}", s);
+fn get_uri_status(uri: &str) -> u16 {
+    let url = Url::parse(uri);
+    match url {
+        Err(why) => panic!("{:?}", why),
+        Ok(url) => {
+            println!("Checking: {:?}", url.to_string());
+            let resp = reqwest::get(url.as_str());
+            let status = resp.unwrap().status();
+            println!("Response: {}", status);
+            return status.as_u16();
         }
-        return true
-    } else {
-        return false;
     }
 }
 
 // another function that will alert someone, maybe slack webhook.
 fn notify() {
-    println!("bummer");
+    println!("Bummer. Failed to acquire an OK status from the requested site.");
+}
+
+fn positive_status(status: u16) -> bool {
+    if status == 200 {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 fn main() {
     dotenv().ok();
 
-    let uri = env::var("URL").expect("URL must be set");
-    let auth_token = env::var("AUTH")
-                          .expect("URL must be set. At least an empty string.");
-
+    let uri = env::var("URL").unwrap();
     let mut attempts = 0;
     const MAX_ATTEMPTS: i32 = 5;
 
-    while !check_url(&uri, &auth_token) {
-        println!("site not responding, rechecking...");
+    while !positive_status(get_uri_status(&uri)) {
+        println!("The requested site did not respond with 200, rechecking in 60 seconds.");
         sleep(Duration::from_secs(60));
         attempts += 1;
         if attempts >= MAX_ATTEMPTS {

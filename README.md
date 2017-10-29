@@ -22,6 +22,8 @@
 
 `cargo run` note: run will also build as needed.
 
+`URL=http://example.com cargo run` should also work if you don't have an `.env` file set.
+
 ## release
 
 `cargo build --release` note: provides some optimizations; not meant for debugging
