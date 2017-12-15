@@ -2,7 +2,7 @@ extern crate reqwest;
 extern crate dotenv;
 
 use dotenv::dotenv;
-use std::io::Read;
+// use std::io::Read;
 use std::env;
 use std::time::{Duration};
 use std::thread::sleep;
@@ -27,11 +27,12 @@ fn notify() {
     println!("Bummer. Failed to acquire an OK status from the requested site.");
 }
 
-fn positive_status(status: u16) -> bool {
-    if status == 200 {
-        return true;
-    } else {
-        return false;
+fn successful_status(status: u16) -> bool {
+    match status {
+        200 => return true,
+        201 => return true,
+        202 => return true,
+        _ => return false
     }
 }
 
@@ -42,8 +43,8 @@ fn main() {
     let mut attempts = 0;
     const MAX_ATTEMPTS: i32 = 5;
 
-    while !positive_status(get_uri_status(&uri)) {
-        println!("The requested site did not respond with 200, rechecking in 60 seconds.");
+    while !successful_status(get_uri_status(&uri)) {
+        println!("The requested site did not respond with a successful status code, rechecking in 60 seconds.");
         sleep(Duration::from_secs(60));
         attempts += 1;
         if attempts >= MAX_ATTEMPTS {
